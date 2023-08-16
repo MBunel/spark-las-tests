@@ -22,12 +22,12 @@ class LAS4jReader(readDataSchema: StructType, path: String)
 
   override def get(): InternalRow = {
     val point = points.next()
-    gg(point)
+    extract_field(point)
   }
 
   override def close(): Unit = {}
 
-  private def gg(point: LASPoint): InternalRow = {
+  private def extract_field(point: LASPoint): InternalRow = {
     var fields_values: Seq[Any] = Seq()
 
     for (field <- this.dataSchema.iterator) {
@@ -52,10 +52,9 @@ class LAS4jReader(readDataSchema: StructType, path: String)
         case "Point source ID"     => point.getPointSourceID.toInt
         case "GPS Time"            => point.getGPSTime
       }
-
       fields_values = fields_values :+ value
     }
-    return InternalRow.fromSeq(fields_values)
+    InternalRow.fromSeq(fields_values)
   }
 
 }
