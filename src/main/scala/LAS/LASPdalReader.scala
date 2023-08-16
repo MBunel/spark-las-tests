@@ -4,11 +4,13 @@ import io.pdal.PointViewIterator
 import io.pdal.pipeline.ReadLas
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.read.PartitionReader
+import org.apache.spark.sql.types.StructType
 
 /** Las file reader, based on pdal
   * @param path
   */
-class LASPdalReader(path: String) extends PartitionReader[InternalRow] {
+class LASPdalReader(readDataSchema: StructType, path: String)
+    extends PartitionReader[InternalRow] {
 
   private val expression = ReadLas(path)
   private val pipeline = expression.toPipeline

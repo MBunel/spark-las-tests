@@ -11,18 +11,19 @@ import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 import scala.jdk.CollectionConverters.MapHasAsScala
 
-
-case class LASScan(sparkSession: SparkSession,
-                   fileIndex: PartitioningAwareFileIndex,
-                   dataSchema: StructType,
-                   readDataSchema: StructType,
-                   readPartitionSchema: StructType,
-                   options: CaseInsensitiveStringMap,
-                   pushedFilters: Array[Filter],
-                   partitionFilters: Seq[Expression] = Seq.empty,
-                   dataFilters: Seq[Expression] = Seq.empty) extends FileScan {
+case class LASScan(
+    sparkSession: SparkSession,
+    fileIndex: PartitioningAwareFileIndex,
+    dataSchema: StructType,
+    readDataSchema: StructType,
+    readPartitionSchema: StructType,
+    options: CaseInsensitiveStringMap,
+    pushedFilters: Array[Filter],
+    partitionFilters: Seq[Expression] = Seq.empty,
+    dataFilters: Seq[Expression] = Seq.empty
+) extends FileScan {
   override def createReaderFactory(): PartitionReaderFactory = {
     val las_options = new LASOptions(options.asCaseSensitiveMap.asScala.toMap)
-    LASPartitionReaderFactory(las_options)
+    LASPartitionReaderFactory(readDataSchema, las_options)
   }
 }

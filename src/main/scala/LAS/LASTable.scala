@@ -5,14 +5,16 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.write.{LogicalWriteInfo, WriteBuilder}
 import org.apache.spark.sql.execution.datasources.FileFormat
 import org.apache.spark.sql.execution.datasources.v2.FileTable
-import org.apache.spark.sql.types.{
-  FloatType,
-  ShortType,
-  StructField,
-  StructType
-}
+import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
+/** @param name
+  * @param sparkSession
+  * @param options
+  * @param paths
+  * @param userSpecifiedSchema
+  * @param fallbackFileFormat
+  */
 case class LASTable(
     name: String,
     sparkSession: SparkSession,
@@ -22,16 +24,10 @@ case class LASTable(
     fallbackFileFormat: Class[_ <: FileFormat]
 ) extends FileTable(sparkSession, options, paths, userSpecifiedSchema) {
 
-  override def inferSchema(files: Seq[FileStatus]): Option[StructType] = Some(
-    StructType(
-      Array(
-        StructField("X", FloatType, nullable = false),
-        StructField("Y", FloatType, nullable = false),
-        StructField("Z", FloatType, nullable = false),
-        StructField("Classification", ShortType, nullable = false)
-      )
-    )
-  )
+  override def inferSchema(files: Seq[FileStatus]): Option[StructType] = {
+    //val parsedOptions = new LASOptions(options)
+    Las4JDataSource.inferSchema(sparkSession, files, null)
+  }
 
   override def formatName: String = "LAS"
 

@@ -10,6 +10,8 @@ import org.apache.spark.sql.util.CaseInsensitiveStringMap
   * Main class for the las datasource.
   *
   * Inspired by the spark csv and parquet readers
+  *
+  * TODO: Schema inference; write las; filters
   */
 class LAS extends FileDataSourceV2 {
 

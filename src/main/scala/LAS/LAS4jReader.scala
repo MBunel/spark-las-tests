@@ -1,16 +1,19 @@
 package LAS
 
-import com.github.mreutegg.laszip4j.LASReader
+import com.github.mreutegg.laszip4j.{LASPoint, LASReader}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.read.PartitionReader
+import org.apache.spark.sql.types.StructType
 
 import java.io.File
 
 /** Las file reader, based on  laszip4j
   * @param path
   */
-class LAS4jReader(path: String) extends PartitionReader[InternalRow] {
+class LAS4jReader(readDataSchema: StructType, path: String)
+    extends PartitionReader[InternalRow] {
 
+  val dataSchema = readDataSchema
   val reader = new LASReader(new File(path))
   val header = reader.getHeader
   val points = reader.getPoints.iterator()
@@ -19,13 +22,40 @@ class LAS4jReader(path: String) extends PartitionReader[InternalRow] {
 
   override def get(): InternalRow = {
     val point = points.next()
-    InternalRow(
-      point.getX.toFloat * header.getXScaleFactor.toFloat,
-      point.getY.toFloat * header.getYScaleFactor.toFloat,
-      point.getZ.toFloat * header.getZScaleFactor.toFloat,
-      point.getClassification
-    )
+    gg(point)
   }
 
   override def close(): Unit = {}
+
+  private def gg(point: LASPoint): InternalRow = {
+    var fields_values: Seq[Any] = Seq()
+
+    for (field <- this.dataSchema.iterator) {
+
+      val value = field.name match {
+        case "X"                   => point.getX.toFloat * header.getXScaleFactor.toFloat
+        case "Y"                   => point.getY.toFloat * header.getYScaleFactor.toFloat
+        case "Z"                   => point.getZ.toFloat * header.getZScaleFactor.toFloat
+        case "Intensity"           => point.getIntensity.toShort
+        case "Return number"       => point.getReturnNumber
+        case "Number of returns"   => point.getNumberOfReturns
+        case "Scan direction flag" => point.getScanDirectionFlag
+        case "Edge of flight line" => point.getEdgeOfFlightLine
+        case "Classification"      => point.getClassification
+        case "Is Synthetic"        => point.isSynthetic
+        case "Is key-point"        => point.isKeyPoint
+        case "Is Withheld"         => point.isWithheld
+        case "Is Overlap"          => null
+        case "Scanner Channel"     => null
+        case "User data"           => point.getUserData
+        case "Scan angle rank"     => point.getScanAngleRank.toShort
+        case "Point source ID"     => point.getPointSourceID.toInt
+        case "GPS Time"            => point.getGPSTime
+      }
+
+      fields_values = fields_values :+ value
+    }
+    return InternalRow.fromSeq(fields_values)
+  }
+
 }
