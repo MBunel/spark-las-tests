@@ -85,6 +85,54 @@ class LASTest extends org.scalatest.funsuite.AnyFunSuiteLike {
     assert(KM.count() == 11484)
   }
 
+  test("Read las point type 0") {
+    cancel()
+  }
+
+  test("Read las point type 1") {
+    cancel()
+  }
+
+  test("Read las point type 2") {
+    cancel()
+  }
+
+  test("Read las point type 3") {
+    cancel()
+  }
+
+  test("Read las point type 4") {
+    cancel()
+  }
+
+  test("Read las point type 5") {
+    cancel()
+  }
+
+  test("Read las point type 6") {
+    cancel()
+  }
+
+  test("Read las point type 7") {
+    cancel()
+  }
+
+  test("Read las point type 8") {
+    cancel()
+  }
+
+  test("Read las point type 9") {
+    cancel()
+  }
+
+  test("Read las point type 10") {
+    cancel()
+  }
+
+  test("Read las with VLR and EVLR") {
+    cancel()
+  }
+
   // Write test
 
 }
