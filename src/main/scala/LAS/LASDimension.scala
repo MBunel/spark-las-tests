@@ -10,7 +10,8 @@ abstract class LASDimension extends Serializable {
 
 }
 
-object LASDimension extends Serializable {
+object LASDimension extends Enumeration {
+  // Transform in enum ?
   private val X = StructField("X", FloatType, nullable = false)
   private val Y = StructField("Y", FloatType, nullable = false)
   private val Z = StructField("Z", FloatType, nullable = false)

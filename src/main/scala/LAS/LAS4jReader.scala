@@ -1,22 +1,30 @@
 package LAS
 
 import com.github.mreutegg.laszip4j.{LASPoint, LASReader}
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.read.PartitionReader
+import org.apache.spark.sql.execution.datasources.CodecStreams
 import org.apache.spark.sql.types.StructType
 
-import java.io.File
+import java.net.URI
 
 /** Las file reader, based on  laszip4j
   * @param path
   */
-class LAS4jReader(readDataSchema: StructType, path: String)
+class LAS4jReader(conf: Configuration, readDataSchema: StructType, path: URI)
     extends PartitionReader[InternalRow] {
 
   val dataSchema = readDataSchema
-  val reader = new LASReader(new File(path))
-  val header = reader.getHeader
-  val points = reader.getPoints.iterator()
+  val is = (
+    CodecStreams.createInputStream(conf, new Path(path)),
+    CodecStreams.createInputStream(conf, new Path(path))
+  )
+
+  // TODO: Look for replace LASReader by LASreaderLAS
+  val header = LASReader.getHeader(is._1)
+  val points = LASReader.getPoints(is._2).iterator()
 
   override def next(): Boolean = points.hasNext
 

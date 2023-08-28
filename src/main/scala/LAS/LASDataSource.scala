@@ -1,14 +1,12 @@
 package LAS
 
-import com.github.mreutegg.laszip4j.LASReader
-import org.apache.hadoop.fs.FileStatus
+import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path.getPathWithoutSchemeAndAuthority
+import org.apache.hadoop.fs.{FileStatus, FileSystem}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Dataset, SparkSession}
-
-import java.io.File
 
 /** Common functions to treat las data file
   */
@@ -25,15 +23,30 @@ abstract class LASDataSource extends Serializable {
     }
   }
 
+  def fieldExtractor(structField: StructField): StructField => DataType
+
+  def readFile(): Iterator[InternalRow] = ???
+
   protected def infer(
       sparkSession: SparkSession,
       inputPaths: Seq[FileStatus],
       parsedOptions: LASOptions
   ): StructType
 
-  def fieldExtractor(structField: StructField): StructField => DataType
+  protected final def mergeSchemas(
+      schemas: Seq[StructType],
+      mergeMode: String = "intersection"
+  ): StructType = {
+    val schemas_set = schemas.map(x => x.toSet)
 
-  def readFile(): Iterator[InternalRow] = ???
+    val mergedSchemas = mergeMode match {
+      case "union"        => schemas_set.reduce((x, y) => x union y)
+      case "intersection" => schemas_set.reduce((x, y) => x intersect y)
+    }
+
+    // TODO: Find a way to sort
+    StructType(mergedSchemas.toArray)
+  }
 
 }
 
@@ -56,30 +69,41 @@ object Las4JDataSource extends LASDataSource {
       inputPaths: Seq[FileStatus],
       parsedOptions: LASOptions
   ): Dataset[String] = ???
+
   override protected def infer(
       sparkSession: SparkSession,
       inputPaths: Seq[FileStatus],
       parsedOptions: LASOptions
   ): StructType = {
-    // Write something for infer a file schema
 
+    // TODO: Use spark structures for merge schemas
     //val headers: Dataset[String] = createBaseDataset(sparkSession, inputPaths, parsedOptions)
 
     // This fun made a seq of las headers
     val test = inputPaths
       .map(_.getPath)
       .map(getPathWithoutSchemeAndAuthority(_).toString)
-    val tt = test.map(x => new LASReader(new File(x)).getHeader)
 
-    // Return a hardcoded schema
-    val schema = tt
-      .map(x => x.getPointDataRecordFormat)
-      .map(x => StructType(LASDimension.pointFormatToSchema(x)))
-    // Just for test
-    val yo = LASDimension.pointFormatToSchema(dataRecordFormat = 6);
-    val yA = LASDimension.pointFormatToSchema(dataRecordFormat = 2);
+    // Test code generate header for each file
 
-    StructType(yo)
+    // find other way
+    val configuration = new Configuration();
+    configuration.set("fs.defaultFS", "hdfs://127.0.0.1:9000/");
+    val fs = FileSystem.getLocal(configuration)
+
+    //val test_2 = inputPaths.map(_.getPath).map(x => fs.open(x))
+
+    //val tt = test_2.map(x => LASReader.getHeader(x))
+
+    // Compute schema for each file
+    //val schema = tt
+    //  .map(x => x.getPointDataRecordFormat)
+    //  .map(x => StructType(LASDimension.pointFormatToSchema(x)))
+
+    //mergeSchemas(schemas = schema)
+
+    StructType(LASDimension.pointFormatToSchema(6))
+
   }
 }
 

@@ -8,6 +8,7 @@ import org.apache.spark.sql.execution.datasources.v2.FileScan
 import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
+import org.apache.spark.util.SerializableConfiguration
 
 import scala.jdk.CollectionConverters.MapHasAsScala
 
@@ -23,7 +24,15 @@ case class LASScan(
     dataFilters: Seq[Expression] = Seq.empty
 ) extends FileScan {
   override def createReaderFactory(): PartitionReaderFactory = {
-    val las_options = new LASOptions(options.asCaseSensitiveMap.asScala.toMap)
-    LASPartitionReaderFactory(readDataSchema, las_options)
+    //
+    val caseSensitiveMap = options.asCaseSensitiveMap.asScala.toMap
+    // Hadoop Configurations are case sensitive.
+    val hadoopConf =
+      sparkSession.sessionState.newHadoopConfWithOptions(caseSensitiveMap)
+    val broadcastedConf = sparkSession.sparkContext.broadcast(
+      new SerializableConfiguration(hadoopConf)
+    )
+    val las_options = new LASOptions(caseSensitiveMap)
+    LASPartitionReaderFactory(broadcastedConf, readDataSchema, las_options)
   }
 }
