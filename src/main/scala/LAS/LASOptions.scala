@@ -29,7 +29,7 @@ class LASOptions(@transient parameters: CaseInsensitiveMap[String])
   val project_id = parameters.getOrElse(PROJECT_ID, "")
   val pdal_metadata = getBool(PDAL_METADATA)
   val las_reader: String = parameters.get(LAS_READER) match {
-    case _: None.type => "pdal"
+    case _: None.type => "las4j"
     case Some(value) =>
       value match {
         case x if x == "pdal" || x == "las4j" => x
@@ -108,5 +108,5 @@ object LASOptions extends DataSourceOptions {
   val SYSTEM_ID = newOption("system_id")
   val PROJECT_ID = newOption("project_id")
   val PDAL_METADATA = newOption("pdal_metadata")
-
+  val MAX_POINTS = newOption("maxPoints")
 }
