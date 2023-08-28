@@ -7,15 +7,17 @@ lazy val root = (project in file("."))
     name := "Test_pdal_scala"
   )
 
-//javaOptions +=
+// For use local version of laszip4j
+resolvers += "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository"
 
 libraryDependencies ++= Seq(
-  "com.github.mreutegg" % "laszip4j" % "0.14",
   "org.apache.spark" %% "spark-sql" % "3.4.1",
-  "io.pdal" %% "pdal" % "2.3.1",        // core library
-  "io.pdal" %  "pdal-native" % "2.3.1", // jni binaries
-  "io.pdal" %% "pdal-scala" % "2.3.1"   // if scala core library (if required)
+  "io.pdal" %% "pdal" % "2.3.1", // core library
+  "io.pdal" % "pdal-native" % "2.3.1", // jni binaries
+  "io.pdal" %% "pdal-scala" % "2.3.1" // if scala core library (if required)
 )
+
+libraryDependencies += "com.github.mreutegg" % "laszip4j" % "0.15-SNAPSHOT"
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "latest.integration" % Test
