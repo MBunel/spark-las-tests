@@ -1,4 +1,4 @@
-package LAS
+package IO.LAS
 
 import org.apache.hadoop.mapreduce.{Job, TaskAttemptContext}
 import org.apache.spark.sql.connector.write.LogicalWriteInfo
@@ -25,15 +25,14 @@ case class LASWrite(
   ): OutputWriterFactory = {
 
     new OutputWriterFactory {
-      override def getFileExtension(context: TaskAttemptContext): String = ".las"
+      override def getFileExtension(context: TaskAttemptContext): String =
+        ".las"
 
       override def newInstance(
           path: String,
           dataSchema: StructType,
           context: TaskAttemptContext
       ): OutputWriter = ???
-        // new LASOutputWriter(path, dataSchema, context, LASOptions)
     }
-
   }
 }

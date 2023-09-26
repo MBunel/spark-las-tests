@@ -1,12 +1,14 @@
-package LAS
+package IO.LAS
 
+import io.pdal.pipeline.ReadLas
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path.getPathWithoutSchemeAndAuthority
 import org.apache.hadoop.fs.{FileStatus, FileSystem}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.{Dataset, SparkSession, functions}
 
 /** Common functions to treat las data file
   */
@@ -39,6 +41,7 @@ abstract class LASDataSource extends Serializable {
   ): StructType = {
     val schemas_set = schemas.map(x => x.toSet)
 
+    // TODO: Correct the order problem
     val mergedSchemas = mergeMode match {
       case "union"        => schemas_set.reduce((x, y) => x union y)
       case "intersection" => schemas_set.reduce((x, y) => x intersect y)
@@ -102,8 +105,8 @@ object Las4JDataSource extends LASDataSource {
 
     //mergeSchemas(schemas = schema)
 
+    // Return point type schema (just for debug)
     StructType(LASDimension.pointFormatToSchema(6))
-
   }
 }
 
@@ -116,5 +119,34 @@ object PdalDataSource extends LASDataSource {
       sparkSession: SparkSession,
       inputPaths: Seq[FileStatus],
       parsedOptions: LASOptions
-  ): StructType = ???
+  ): StructType = {
+
+    // find other way
+    val configuration = new Configuration();
+    configuration.set("fs.defaultFS", "hdfs://127.0.0.1:9000/");
+    val fs = FileSystem.getLocal(configuration)
+
+    // Import implicit for dataset creation
+    import sparkSession.implicits._
+
+    // TODO Find a way to get file info on schema_dataset
+    val schema_dataset = sparkSession.createDataset(
+      inputPaths.map(file =>
+        ReadLas(file.getPath.toUri.getPath).toPipeline.getQuickInfo()
+      )
+    )
+    val schema_json = sparkSession.read.json(schema_dataset).toDF("header")
+
+    val dimensions =
+      schema_json.select(
+        functions.split(col("header.dimensions"), ",").as("dimensions")
+      )
+
+    //val schema = LASDimension.dimensionsToSchema(dimensions.head)
+
+    //mergeSchemas(schemas = schema)
+
+    // Return point type schema (just for debug)
+    StructType(LASDimension.pointFormatToSchema(6))
+  }
 }

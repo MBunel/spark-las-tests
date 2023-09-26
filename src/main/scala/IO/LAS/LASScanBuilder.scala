@@ -1,4 +1,4 @@
-package LAS
+package IO.LAS
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.datasources.PartitioningAwareFileIndex

@@ -1,4 +1,4 @@
-package LAS.DataSourceV1
+package IO.LAS.DataSourceV1
 
 import org.scalatest.funsuite.AnyFunSuiteLike
 

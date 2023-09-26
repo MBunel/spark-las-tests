@@ -1,13 +1,7 @@
-package LAS.DataSourceV1
+package IO.LAS.DataSourceV1
 
 import com.github.mreutegg.laszip4j.LASReader
-import com.github.mreutegg.laszip4j.laslib.{LASheader, LASwriterLAS}
-import com.github.mreutegg.laszip4j.laszip.{
-  LASattributer,
-  LASitem,
-  LASpoint,
-  LASquantizer
-}
+import com.github.mreutegg.laszip4j.laslib.LASwriterLAS
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.TaskAttemptContext
 import org.apache.spark.internal.Logging
@@ -17,6 +11,11 @@ import org.apache.spark.sql.types.StructType
 
 import java.io.{File, PrintStream}
 
+/** @param path
+  * @param dataSchema
+  * @param context
+  * @param params
+  */
 class LASOutputWriter(
     path: String,
     dataSchema: StructType,
@@ -30,22 +29,11 @@ class LASOutputWriter(
 
   val file_test = new LASReader(new File("/home/MBunel/Bureau/pt002561.las"))
 
-  private val header = file_test.getHeader.hea
+  private val header = file_test.getHeader
   private val writer = new LASwriterLAS()
 
-  writer.open(stream, header, '0', 0, -1)
-  override def write(row: InternalRow): Unit = {
-    val pt: LASpoint = new LASpoint()
-    val qt = new LASquantizer()
-    val at = new LASattributer()
-
-    pt.init(qt, 0, new LASitem(), at)
-
-    writer.write_point(pt)
-  }
-
+  override def write(row: InternalRow): Unit = ???
   override def close(): Unit = {
-    writer.update_header(header, true, true)
     writer.close(true)
   }
 

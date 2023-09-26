@@ -1,4 +1,4 @@
-package LAS
+package IO.LAS
 
 import org.apache.spark.sql.types._
 
@@ -11,6 +11,7 @@ abstract class LASDimension extends Serializable {
 }
 
 object LASDimension extends Enumeration {
+  type LASDimension = StructField
   // Transform in enum ?
   private val X = StructField("X", FloatType, nullable = false)
   private val Y = StructField("Y", FloatType, nullable = false)
@@ -129,5 +130,8 @@ object LASDimension extends Enumeration {
     }
 
   }
+
+  final def dimensionsToSchema(dimension: Seq[String]): Array[StructType] = ???
+  // TODO Find a way to iterate on values for transform a list of dims in Array of struct
 
 }

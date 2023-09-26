@@ -1,4 +1,4 @@
-package LAS
+package IO.LAS
 
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.catalyst.InternalRow

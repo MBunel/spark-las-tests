@@ -1,4 +1,4 @@
-package LAS
+package IO.LAS
 
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 import org.apache.spark.sql.catalyst.{DataSourceOptions, FileSourceOptions}
@@ -100,13 +100,22 @@ object LASOptions extends DataSourceOptions {
   val SPLIT_COORDINATES = newOption("splitCoordinates")
   val MERGE_SCHEMA = newOption("mergeSchema")
   val MERGE_SCHEMA_MODE = newOption("mergeSchemaMode")
+  // val READ_VLR
 
   // Writer only
   val COMPRESSION = newOption("compression")
+
   val CREATION_DAY = newOption("creation_day")
   val CREATION_YEAR = newOption("creation_year")
   val SYSTEM_ID = newOption("system_id")
   val PROJECT_ID = newOption("project_id")
   val PDAL_METADATA = newOption("pdal_metadata")
   val MAX_POINTS = newOption("maxPoints")
+
+  // val WRITE_VLR ??
+  // val SCALES x,y,z
+  // val OFFSETS x,y,z
+  // val VERSION 1.1 1.2, ...
+  // val POINT_FORMAT 1 2 3, ...
+
 }

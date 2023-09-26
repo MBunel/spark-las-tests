@@ -1,4 +1,4 @@
-package LAS
+package IO.LAS
 
 import com.github.mreutegg.laszip4j.{LASPoint, LASReader}
 import org.apache.hadoop.conf.Configuration
